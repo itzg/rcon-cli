@@ -15,7 +15,7 @@ stages:
           go build
       - type: deploy
         command: |
-          tag=$(git describe --exact-match --tags 2> /dev/null)
+          tag=$(git describe --exact-match --tags)
           if [ $? = 0 ]; then
             go get github.com/mitchellh/gox
             go get github.com/tcnksm/ghr
