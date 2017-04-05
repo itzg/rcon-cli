@@ -14,11 +14,13 @@ stages:
           go build
       - type: deploy
         command: |
-          tag=$(git describe --exact-match --tags)
+          tag=$(git describe --exact-match --tags 2> /dev/null)
           if [ $? = 0 ]; then
             go get github.com/mitchellh/gox
             go get github.com/tcnksm/ghr
             CGO_ENABLED=0 gox \
               -output "dist/rcon-cli_{{.OS}}_{{.Arch}}"
             ghr -u $CIRCLE_USERNAME -r rcon-cli --replace $tag dist/
+          else
+            echo "Not tagged, so skipping deploy"
           fi
