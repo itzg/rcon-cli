@@ -1,0 +1,1 @@
+A little RCON cli based on james4k's RCON library for golang.

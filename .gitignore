@@ -1,0 +1,5 @@
+/.idea/
+/*.idl
+/dist/
+/vendor/
+/rcon-cli
