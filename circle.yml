@@ -2,6 +2,7 @@ version: 2
 executorType: docker
 containerInfo:
   - image: golang:1.8
+    cmd: ["/bin/bash"]
 stages:
   build:
     workDir: /go/src/github.com/itzg/rcon-cli
