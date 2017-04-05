@@ -2,7 +2,6 @@ version: 2
 executorType: docker
 containerInfo:
   - image: golang:1.8
-    cmd: ["/bin/bash"]
 stages:
   build:
     workDir: /go/src/github.com/itzg/rcon-cli
@@ -15,7 +14,8 @@ stages:
           go build
       - type: deploy
         command: |
-          tag=$(git describe --exact-match --tags)
+          set +e
+          tag=$(git describe --exact-match --tags 2> /dev/null)
           if [ $? = 0 ]; then
             go get github.com/mitchellh/gox
             go get github.com/tcnksm/ghr
