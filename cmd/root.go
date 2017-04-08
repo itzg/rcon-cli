@@ -27,9 +27,6 @@ import (
 
 var (
 	cfgFile string
-	host string
-	password string
-	port int
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -38,9 +35,8 @@ var RootCmd = &cobra.Command{
 	Short: "A CLI for attaching to an RCON enabled game server",
 	Long:  ``,
 	Run:   func(cmd *cobra.Command, args []string) {
-
-		hostPort := net.JoinHostPort(host, strconv.Itoa(port))
-		cli.Start(hostPort, password, os.Stdin, os.Stdout)
+		hostPort := net.JoinHostPort(viper.GetString("host"), strconv.Itoa(viper.GetInt("port")))
+		cli.Start(hostPort, viper.GetString("password"), os.Stdin, os.Stdout)
 	},
 }
 
@@ -57,9 +53,10 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.rcon-cli.yaml)")
-	RootCmd.PersistentFlags().StringVar(&host, "host", "localhost", "RCON server's hostname")
-	RootCmd.PersistentFlags().StringVar(&password, "password", "", "RCON server's password")
-	RootCmd.PersistentFlags().IntVar(&port, "port", 27015, "Server's RCON port")
+	RootCmd.PersistentFlags().String("host", "localhost", "RCON server's hostname")
+	RootCmd.PersistentFlags().String("password", "", "RCON server's password")
+	RootCmd.PersistentFlags().Int("port", 27015, "Server's RCON port")
+	viper.BindPFlags(RootCmd.PersistentFlags())
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -67,6 +64,9 @@ func initConfig() {
 	if cfgFile != "" { // enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
 	}
+
+	// This will allow for env vars like RCON_PORT
+	viper.SetEnvPrefix("rcon")
 
 	viper.SetConfigName(".rcon-cli") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")     // adding home directory as first search path

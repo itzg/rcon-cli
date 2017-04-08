@@ -44,6 +44,9 @@ func Start(hostPort string, password string, in io.Reader, out io.Writer) {
 
 		resp, respReqId, err := remoteConsole.Read()
 		if err != nil {
+			if err == io.EOF {
+				return
+			}
 			fmt.Fprintln(os.Stderr, "Failed to read command:", err.Error())
 			continue
 		}
