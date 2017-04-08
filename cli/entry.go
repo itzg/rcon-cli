@@ -34,6 +34,7 @@ func Start(hostPort string, password string, in io.Reader, out io.Writer) {
 	defer remoteConsole.Close()
 
 	scanner := bufio.NewScanner(in)
+	out.Write([]byte("> "))
 	for scanner.Scan() {
 		cmd := scanner.Text()
 		reqId, err := remoteConsole.Write(cmd)
@@ -56,6 +57,7 @@ func Start(hostPort string, password string, in io.Reader, out io.Writer) {
 		}
 
 		fmt.Fprintln(out, resp)
+		out.Write([]byte("> "))
 	}
 
 	if err := scanner.Err(); err != nil {
