@@ -31,12 +31,32 @@ var (
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "rcon-cli",
+	Use:   "rcon-cli [flags] [RCON command ...]",
 	Short: "A CLI for attaching to an RCON enabled game server",
-	Long:  ``,
+	Example: `
+rcon-cli --host mc1 --port 25575
+rcon-cli --port 25575 stop
+RCON_PORT=25575 rcon-cli stop
+`,
+	Long:  `
+rcon-cli is a CLI for attaching to an RCON enabled game server, such as Minecraft.
+Without any additional arguments, the CLI will start an interactive session with
+the RCON server.
+
+If arguments are passed into the CLI, then the arguments are sent
+as a single command (joined by spaces), the response is displayed,
+and the CLI will exit.
+`,
 	Run:   func(cmd *cobra.Command, args []string) {
+
 		hostPort := net.JoinHostPort(viper.GetString("host"), strconv.Itoa(viper.GetInt("port")))
-		cli.Start(hostPort, viper.GetString("password"), os.Stdin, os.Stdout)
+		password := viper.GetString("password")
+
+		if len(args) == 0 {
+			cli.Start(hostPort, password, os.Stdin, os.Stdout)
+		} else {
+			cli.Execute(hostPort, password, os.Stdout, args...)
+		}
 	},
 }
 
