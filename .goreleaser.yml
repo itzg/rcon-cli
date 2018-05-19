@@ -34,3 +34,7 @@ snapshot:
   name_template: SNAPSHOT-{{ .Commit }}
 dockers:
   - image: itzg/rcon-cli
+changelog:
+  filters:
+    exclude:
+      - '^ci:'
