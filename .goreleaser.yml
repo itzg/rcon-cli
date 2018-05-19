@@ -1,0 +1,36 @@
+project_name: rcon-cli
+release:
+  github:
+    owner: itzg
+    name: rcon-cli
+brew:
+  install: bin.install "rcon-cli"
+builds:
+- goos:
+  - linux
+  - darwin
+  - windows
+  goarch:
+  - amd64
+  - arm
+  main: .
+  binary: rcon-cli
+  env:
+    - CGO_ENABLED=0
+archive:
+  format: tar.gz
+  name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{
+    .Arm }}{{ end }}'
+  files:
+  - licence*
+  - LICENCE*
+  - license*
+  - LICENSE*
+  - readme*
+  - README*
+  - changelog*
+  - CHANGELOG*
+snapshot:
+  name_template: SNAPSHOT-{{ .Commit }}
+dockers:
+  - image: itzg/rcon-cli
