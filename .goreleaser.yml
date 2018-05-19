@@ -3,8 +3,6 @@ release:
   github:
     owner: itzg
     name: rcon-cli
-brew:
-  install: bin.install "rcon-cli"
 builds:
 - goos:
   - linux
@@ -32,9 +30,20 @@ archive:
   - CHANGELOG*
 snapshot:
   name_template: SNAPSHOT-{{ .Commit }}
-dockers:
-  - image: itzg/rcon-cli
 changelog:
   filters:
     exclude:
       - '^ci:'
+dockers:
+  - image: itzg/rcon-cli
+    goos: linux
+    goarch: amd64
+    tag_templates:
+    - "{{ .Tag }}"
+    - latest
+scoop:
+  bucket:
+    owner: itzg
+    name: scoop-bucket
+  license: Apache2
+  description: Enables REST-like access to HTML pages by scraping and parsing them into JSON

@@ -36,7 +36,9 @@ jobs:
       - run: dep ensure -vendor-only
 
       - setup_remote_docker
-      - run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
+      - run:
+          name: docker login
+          command: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
       - run:
           name: goreleaser
           command: curl -sL https://git.io/goreleaser | bash

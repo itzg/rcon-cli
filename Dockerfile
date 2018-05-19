@@ -1,3 +1,3 @@
 FROM scratch
-COPY rcon-cli /usr/bin/
-ENTRYPOINT /usr/bin/rcon-cli
+COPY rcon-cli /
+ENTRYPOINT /rcon-cli
