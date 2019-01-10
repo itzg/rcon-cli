@@ -3,3 +3,5 @@
 /dist/
 /vendor/
 /rcon-cli
+/rcon-cli.exe
+/config.yml

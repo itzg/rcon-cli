@@ -2,10 +2,7 @@ version: 2
 
 defaults: &defaults
   docker:
-    - image: circleci/golang:1.10
-
-  working_directory: /go/src/github.com/itzg/rcon-cli
-
+    - image: circleci/golang:1.11
 
 jobs:
   build:
@@ -15,25 +12,21 @@ jobs:
 
       - restore_cache:
           keys:
-            - cache-{{ arch }}-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+            - cache-{{ arch }}-{{ .Branch }}-{{ checksum "go.sum" }}
             - cache-{{ arch }}-{{ .Branch }}
             - cache
 
-      - run: dep ensure -vendor-only
+      - run: go test -mod=readonly
 
       - save_cache:
-          key: cache-{{ arch }}-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          key: cache-{{ arch }}-{{ .Branch }}-{{ checksum "go.sum" }}
           paths:
-            - vendor
-
-      - run: go test
+            - $GOPATH/pkg
 
   release:
     <<: *defaults
     steps:
       - checkout
-
-      - run: dep ensure -vendor-only
 
       - setup_remote_docker
       - run:
