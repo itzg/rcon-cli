@@ -16,12 +16,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/itzg/rcon-cli/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"net"
-	"github.com/itzg/rcon-cli/cli"
 	"strconv"
 )
 
@@ -38,7 +39,7 @@ rcon-cli --host mc1 --port 25575
 rcon-cli --port 25575 stop
 RCON_PORT=25575 rcon-cli stop
 `,
-	Long:  `
+	Long: `
 rcon-cli is a CLI for attaching to an RCON enabled game server, such as Minecraft.
 Without any additional arguments, the CLI will start an interactive session with
 the RCON server.
@@ -47,7 +48,7 @@ If arguments are passed into the CLI, then the arguments are sent
 as a single command (joined by spaces), the response is displayed,
 and the CLI will exit.
 `,
-	Run:   func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 
 		hostPort := net.JoinHostPort(viper.GetString("host"), strconv.Itoa(viper.GetInt("port")))
 		password := viper.GetString("password")
@@ -76,21 +77,24 @@ func init() {
 	RootCmd.PersistentFlags().String("host", "localhost", "RCON server's hostname")
 	RootCmd.PersistentFlags().String("password", "", "RCON server's password")
 	RootCmd.PersistentFlags().Int("port", 27015, "Server's RCON port")
-	viper.BindPFlags(RootCmd.PersistentFlags())
+	err := viper.BindPFlags(RootCmd.PersistentFlags())
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" { // enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
+	} else {
+		viper.SetConfigName(".rcon-cli") // name of config file (without extension)
+		viper.AddConfigPath("$HOME")     // adding home directory as first search path
 	}
 
 	// This will allow for env vars like RCON_PORT
 	viper.SetEnvPrefix("rcon")
-
-	viper.SetConfigName(".rcon-cli") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")     // adding home directory as first search path
-	viper.AutomaticEnv()             // read in environment variables that match
+	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
