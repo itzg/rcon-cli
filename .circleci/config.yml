@@ -16,12 +16,14 @@ jobs:
             - cache-{{ arch }}-{{ .Branch }}
             - cache
 
-      - run: go test -mod=readonly
+      - run: go mod download
 
       - save_cache:
           key: cache-{{ arch }}-{{ .Branch }}-{{ checksum "go.sum" }}
           paths:
             - $GOPATH/pkg
+
+      - run: go test -mod=readonly
 
   release:
     <<: *defaults

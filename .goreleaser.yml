@@ -1,4 +1,7 @@
 project_name: rcon-cli
+before:
+  hooks:
+    - go mod download
 release:
   github:
     owner: itzg
