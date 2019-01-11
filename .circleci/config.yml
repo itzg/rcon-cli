@@ -36,7 +36,7 @@ jobs:
           command: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
       - run:
           name: goreleaser
-          command: curl -sL https://git.io/goreleaser | bash -- --skip-publish
+          command: curl -sL https://git.io/goreleaser | bash -s -- --skip-publish
 
 workflows:
   version: 2
