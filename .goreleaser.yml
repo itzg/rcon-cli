@@ -1,4 +1,7 @@
 project_name: rcon-cli
+before:
+  hooks:
+    - go mod download
 release:
   github:
     owner: itzg
@@ -35,12 +38,11 @@ changelog:
     exclude:
       - '^ci:'
 dockers:
-  - image: itzg/rcon-cli
+  - image_templates:
+      - "itzg/rcon-cli:{{ .Tag }}"
+      - "itzg/rcon-cli:latest"
     goos: linux
     goarch: amd64
-    tag_templates:
-    - "{{ .Tag }}"
-    - latest
 scoop:
   bucket:
     owner: itzg
