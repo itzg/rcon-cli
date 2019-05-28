@@ -35,3 +35,16 @@ Flags:
       --password string   RCON server's password
       --port int          Server's RCON port (default 27015)
 ```
+
+## Configuration
+
+You can preconfigure rcon-cli to use the arguments you want by default by modifying the file `.rcon-cli.yaml` in your home folder. If you want to use any other file use the argument `--config /path/to/the/config.yaml`. 
+
+Example of a `.rcon-cli.yaml` file:
+```yaml
+host: mydomain.com
+port: 12345
+password: mycustompassword
+```
+
+That way executing `rcon-cli` without arguments would connect to `mydomain.com:12345` with the password `mycustompassword` by default.
