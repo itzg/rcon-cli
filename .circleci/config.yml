@@ -2,7 +2,7 @@ version: 2
 
 defaults: &defaults
   docker:
-    - image: circleci/golang:1.12
+    - image: circleci/golang:1.13
 
 jobs:
   build:
@@ -12,14 +12,12 @@ jobs:
 
       - restore_cache:
           keys:
-            - cache-{{ arch }}-{{ .Branch }}-{{ checksum "go.sum" }}
-            - cache-{{ arch }}-{{ .Branch }}
-            - cache
+            - cache-{{ arch }}-{{ checksum "go.sum" }}
 
       - run: go mod download
 
       - save_cache:
-          key: cache-{{ arch }}-{{ .Branch }}-{{ checksum "go.sum" }}
+          key: cache-{{ arch }}-{{ checksum "go.sum" }}
           paths:
             - /go/pkg
 
