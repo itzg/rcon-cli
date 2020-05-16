@@ -23,19 +23,20 @@ builds:
   binary: rcon-cli
   env:
     - CGO_ENABLED=0
-archive:
-  format: tar.gz
-  name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{
-    .Arm }}{{ end }}'
-  files:
-  - licence*
-  - LICENCE*
-  - license*
-  - LICENSE*
-  - readme*
-  - README*
-  - changelog*
-  - CHANGELOG*
+archives:
+  -
+    format: tar.gz
+    name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{
+      .Arm }}{{ end }}'
+    files:
+    - licence*
+    - LICENCE*
+    - license*
+    - LICENSE*
+    - readme*
+    - README*
+    - changelog*
+    - CHANGELOG*
 snapshot:
   name_template: SNAPSHOT-{{ .Commit }}
 changelog:
