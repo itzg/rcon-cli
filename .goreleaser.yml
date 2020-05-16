@@ -43,6 +43,7 @@ changelog:
   filters:
     exclude:
       - '^ci:'
+      - '^docs:'
 dockers:
   - image_templates:
       - "itzg/rcon-cli:{{ .Tag }}"
