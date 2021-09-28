@@ -103,7 +103,6 @@ func Execute(hostPort string, password string, out io.Writer, command ...string)
 	defer remoteConsole.Close()
 
 	preparedCmd := strings.Join(command, " ")
-
 	reqId, err := remoteConsole.Write(preparedCmd)
 
 	resp, respReqId, err := remoteConsole.Read()
