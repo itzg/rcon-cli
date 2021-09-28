@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  minecraft-server:
+    image: itzg/minecraft-server:latest
+    environment:
+      EULA: true
+      TYPE: paper
+      ENABLE_RCON: true
+      RCON_PASSWORD: password
+    ports:
+      - "127.0.0.1:25575:25575"
