@@ -27,8 +27,8 @@ import (
 	"strings"
 )
 
-const PARAGRAPH = "§"
-const RESET = "\u001B[0m"
+const SectionSign = "§"
+const Reset = "\u001B[0m"
 
 var colors = map[string]string{
 	"0": "\u001B[30m", // black
@@ -52,7 +52,7 @@ var colors = map[string]string{
 	"o": "\u001B[3m",  // italic
 	"l": "\u001B[1m",  // bold
 	"n": "\u001B[4m",  // underline
-	"r": RESET,        // reset
+	"r": Reset,        // reset
 }
 
 func Start(hostPort string, password string, in io.Reader, out io.Writer) {
@@ -128,10 +128,10 @@ func colorize(str string) string {
 	}
 
 	for code := range colors {
-		str = strings.ReplaceAll(str, PARAGRAPH+code, colors[code])
+		str = strings.ReplaceAll(str, SectionSign+code, colors[code])
 	}
 
-	str = strings.ReplaceAll(str, "\n", "\n"+RESET)
+	str = strings.ReplaceAll(str, "\n", "\n"+Reset)
 
 	return str
 }
