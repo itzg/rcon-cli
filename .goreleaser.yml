@@ -45,22 +45,40 @@ changelog:
 dockers:
   - image_templates:
       - "itzg/rcon-cli:{{ .Version }}-amd64"
-      - "itzg/rcon-cli:latest"
-    binaries:
-      - rcon-cli
+    dockerfile: Dockerfile.release
+    use: buildx
     goos: linux
     goarch: amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
   - image_templates:
       - "itzg/rcon-cli:{{ .Version }}-arm64"
-    binaries:
-      - rcon-cli
+    dockerfile: Dockerfile.release
+    use: buildx
     goos: linux
     goarch: arm64
+    build_flag_templates:
+      - "--platform=linux/arm64"
+  - image_templates:
+      - "itzg/rcon-cli:{{ .Version }}-armv7"
+    dockerfile: Dockerfile.release
+    use: buildx
+    goos: linux
+    goarch: arm
+    goarm: '7'
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
 docker_manifests:
+  - name_template: "itzg/rcon-cli:latest"
+    image_templates:
+      - "itzg/rcon-cli:{{ .Version }}-amd64"
+      - "itzg/rcon-cli:{{ .Version }}-arm64"
+      - "itzg/rcon-cli:{{ .Version }}-armv7"
   - name_template: "itzg/rcon-cli:{{ .Version }}"
     image_templates:
       - "itzg/rcon-cli:{{ .Version }}-amd64"
       - "itzg/rcon-cli:{{ .Version }}-arm64"
+      - "itzg/rcon-cli:{{ .Version }}-armv7"
 scoop:
   bucket:
     owner: itzg
