@@ -1,5 +1,5 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/itzg/rcon-cli)](https://github.com/itzg/rcon-cli/releases/latest)
-[![CircleCI](https://img.shields.io/circleci/build/github/itzg/rcon-cli)](https://app.circleci.com/pipelines/github/itzg/rcon-cli)
+[![test](https://github.com/itzg/rcon-cli/actions/workflows/test.yml/badge.svg)](https://github.com/itzg/rcon-cli/actions/workflows/test.yml)
 
 
 A little RCON cli based on james4k's RCON library for golang.
