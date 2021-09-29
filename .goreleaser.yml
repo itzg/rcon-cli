@@ -83,5 +83,6 @@ scoop:
   bucket:
     owner: itzg
     name: scoop-bucket
+    token: "{{ .Env.SCOOP_BUCKET_GITHUB_TOKEN }}"
   license: Apache2
   description: Enables REST-like access to HTML pages by scraping and parsing them into JSON
