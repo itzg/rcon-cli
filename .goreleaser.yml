@@ -37,8 +37,6 @@ archives:
     - README*
     - changelog*
     - CHANGELOG*
-snapshot:
-  name_template: SNAPSHOT-{{ .Commit }}
 changelog:
   filters:
     exclude:
@@ -46,10 +44,23 @@ changelog:
       - '^docs:'
 dockers:
   - image_templates:
-      - "itzg/rcon-cli:{{ .Tag }}"
+      - "itzg/rcon-cli:{{ .Version }}-amd64"
       - "itzg/rcon-cli:latest"
+    binaries:
+      - rcon-cli
     goos: linux
     goarch: amd64
+  - image_templates:
+      - "itzg/rcon-cli:{{ .Version }}-arm64"
+    binaries:
+      - rcon-cli
+    goos: linux
+    goarch: arm64
+docker_manifests:
+  - name_template: "itzg/rcon-cli:{{ .Version }}"
+    image_templates:
+      - "itzg/rcon-cli:{{ .Version }}-amd64"
+      - "itzg/rcon-cli:{{ .Version }}-arm64"
 scoop:
   bucket:
     owner: itzg
