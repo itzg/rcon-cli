@@ -8,9 +8,9 @@ A little RCON cli based on james4k's RCON library for golang.
 
 1. Download the appropriate binary for your platform from the [latest releases](https://github.com/itzg/rcon-cli/releases/latest)
 
-2. On UNIX-y platforms, set the binary to be executable
+2. On UNIX-y platforms, set the binary to be executable - done!
 
-Done.
+If you [have Go])(https://golang.org/dl/) you could also simply `go get github.com/itzg/rcon-cli && rcon-cli -h`.
 
 ## Usage
 
