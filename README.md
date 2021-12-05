@@ -10,7 +10,7 @@ A little RCON cli based on james4k's RCON library for golang.
 
 2. On UNIX-y platforms, set the binary to be executable - done!
 
-If you [have Go])(https://golang.org/dl/) you could also simply `go get github.com/itzg/rcon-cli && rcon-cli -h`.
+If you [have Go](https://golang.org/dl/) you could also simply `go get github.com/itzg/rcon-cli && rcon-cli -h`.
 
 ## Usage
 
