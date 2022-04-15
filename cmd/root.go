@@ -76,7 +76,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.rcon-cli.yaml)")
 	RootCmd.PersistentFlags().String("host", "localhost", "RCON server's hostname")
 	RootCmd.PersistentFlags().String("password", "", "RCON server's password")
-	RootCmd.PersistentFlags().Int("port", 27015, "Server's RCON port")
+	RootCmd.PersistentFlags().Int("port", 25575, "Server's RCON port")
 	err := viper.BindPFlags(RootCmd.PersistentFlags())
 	if err != nil {
 		log.Fatal(err)
