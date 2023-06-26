@@ -12,13 +12,13 @@ builds:
   - darwin
   - windows
   goarch:
-  - 386
+  - "386"
   - amd64
   - arm
   - arm64
   goarm:
-  - 6
-  - 7
+  - "6"
+  - "7"
   main: .
   binary: rcon-cli
   env:
@@ -26,17 +26,12 @@ builds:
 archives:
   -
     format: tar.gz
+    rlcp: true
     name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{
       .Arm }}{{ end }}'
     files:
-    - licence*
-    - LICENCE*
-    - license*
     - LICENSE*
-    - readme*
     - README*
-    - changelog*
-    - CHANGELOG*
 changelog:
   filters:
     exclude:
@@ -79,11 +74,11 @@ docker_manifests:
       - "itzg/rcon-cli:{{ .Version }}-amd64"
       - "itzg/rcon-cli:{{ .Version }}-arm64"
       - "itzg/rcon-cli:{{ .Version }}-armv7"
-scoop:
-  bucket:
-    owner: itzg
-    name: scoop-bucket
-    token: "{{ .Env.SCOOP_BUCKET_GITHUB_TOKEN }}"
-  folder: bucket
-  license: Apache2
-  description: Enables REST-like access to HTML pages by scraping and parsing them into JSON
+scoops:
+  - bucket:
+      owner: itzg
+      name: scoop-bucket
+      token: "{{ .Env.SCOOP_BUCKET_GITHUB_TOKEN }}"
+    folder: bucket
+    license: Apache2
+    description: Enables REST-like access to HTML pages by scraping and parsing them into JSON
