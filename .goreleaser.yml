@@ -47,6 +47,14 @@ dockers:
     build_flag_templates:
       - "--platform=linux/amd64"
   - image_templates:
+      - "itzg/rcon-cli:{{ .Version }}-ubuntu-amd64"
+    dockerfile: Dockerfile.ubuntu
+    use: buildx
+    goos: linux
+    goarch: amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - image_templates:
       - "itzg/rcon-cli:{{ .Version }}-arm64"
     dockerfile: Dockerfile.release
     use: buildx
@@ -55,8 +63,25 @@ dockers:
     build_flag_templates:
       - "--platform=linux/arm64"
   - image_templates:
+      - "itzg/rcon-cli:{{ .Version }}-ubuntu-arm64"
+    dockerfile: Dockerfile.ubuntu
+    use: buildx
+    goos: linux
+    goarch: arm64
+    build_flag_templates:
+      - "--platform=linux/arm64"
+  - image_templates:
       - "itzg/rcon-cli:{{ .Version }}-armv7"
     dockerfile: Dockerfile.release
+    use: buildx
+    goos: linux
+    goarch: arm
+    goarm: '7'
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+  - image_templates:
+      - "itzg/rcon-cli:{{ .Version }}-ubuntu-armv7"
+    dockerfile: Dockerfile.ubuntu
     use: buildx
     goos: linux
     goarch: arm
@@ -74,6 +99,11 @@ docker_manifests:
       - "itzg/rcon-cli:{{ .Version }}-amd64"
       - "itzg/rcon-cli:{{ .Version }}-arm64"
       - "itzg/rcon-cli:{{ .Version }}-armv7"
+  - name_template: "itzg/rcon-cli:{{ .Version }}-ubuntu"
+    image_templates:
+      - "itzg/rcon-cli:{{ .Version }}-ubuntu-amd64"
+      - "itzg/rcon-cli:{{ .Version }}-ubuntu-arm64"
+      - "itzg/rcon-cli:{{ .Version }}-ubuntu-armv7"
 scoops:
   - bucket:
       owner: itzg
