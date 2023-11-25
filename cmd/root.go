@@ -89,7 +89,9 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		viper.SetConfigName(".rcon-cli") // name of config file (without extension)
-		viper.AddConfigPath("$HOME")     // adding home directory as first search path
+		viper.AddConfigPath("$HOME")
+		viper.AddConfigPath("/data")
+		viper.AddConfigPath("/server")
 	}
 
 	// This will allow for env vars like RCON_PORT
