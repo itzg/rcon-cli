@@ -54,7 +54,7 @@ and the CLI will exit.
 		password := viper.GetString("password")
 
 		if len(args) == 0 {
-			cli.Start(hostPort, password, os.Stdin, os.Stdout)
+			cli.Start(hostPort, password, os.Stdout)
 		} else {
 			cli.Execute(hostPort, password, os.Stdout, args...)
 		}
