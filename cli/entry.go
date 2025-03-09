@@ -17,9 +17,10 @@
 package cli
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
 	"github.com/james4k/rcon"
+	"github.com/peterh/liner"
 	"io"
 	"log"
 	"os"
@@ -55,17 +56,35 @@ var colors = map[string]string{
 	"r": Reset,        // reset
 }
 
-func Start(hostPort string, password string, in io.Reader, out io.Writer) {
+func Start(hostPort string, password string, out io.Writer) {
 	remoteConsole, err := rcon.Dial(hostPort, password)
 	if err != nil {
 		log.Fatal("Failed to connect to RCON server", err)
 	}
 	defer remoteConsole.Close()
 
-	scanner := bufio.NewScanner(in)
-	_, _ = out.Write([]byte("> "))
-	for scanner.Scan() {
-		cmd := scanner.Text()
+	lineEditor := liner.NewLiner()
+	defer lineEditor.Close()
+
+	for {
+		cmd, err := lineEditor.Prompt("> ")
+
+		if err != nil {
+			if errors.Is(err, liner.ErrPromptAborted) {
+				return
+			}
+
+			if errors.Is(err, io.EOF) {
+				return
+			}
+
+			_, _ = fmt.Fprintln(os.Stderr, "Error reading input:", err)
+		}
+
+		if cmd == "exit" {
+			return
+		}
+
 		reqId, err := remoteConsole.Write(cmd)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, "Failed to send command:", err.Error())
@@ -87,11 +106,8 @@ func Start(hostPort string, password string, in io.Reader, out io.Writer) {
 
 		resp = colorize(resp)
 		_, _ = fmt.Fprintln(out, resp)
-		_, _ = out.Write([]byte("> "))
-	}
 
-	if err := scanner.Err(); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "reading standard input:", err)
+		lineEditor.AppendHistory(cmd)
 	}
 }
 
