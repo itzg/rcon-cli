@@ -1,3 +1,5 @@
+version: 2
+
 project_name: rcon-cli
 before:
   hooks:
@@ -24,8 +26,6 @@ builds:
     - CGO_ENABLED=0
 archives:
   -
-    format: tar.gz
-    rlcp: true
     name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{
       .Arm }}{{ end }}'
     files:
