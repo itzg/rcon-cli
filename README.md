@@ -17,7 +17,7 @@ If you [have Go](https://golang.org/dl/) you could also simply `go get github.co
 ```text
 rcon-cli is a CLI for attaching to an RCON enabled game server, such as Minecraft.
 Without any additional arguments, the CLI will start an interactive session with
-the RCON server.
+the RCON server. Send the keyword "exit" to close the session. The CLI will exit.
 
 If arguments are passed into the CLI, then the arguments are sent
 as a single command (joined by spaces), the response is displayed,
