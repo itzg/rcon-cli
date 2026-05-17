@@ -5,6 +5,7 @@ before:
   hooks:
     - go mod download
 release:
+  replace_existing_artifacts: true
   github:
     owner: itzg
     name: rcon-cli
