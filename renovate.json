@@ -2,5 +2,17 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "addLabels": ["dependencies"],
+  "packageRules": [
+    {
+      "matchManagers": ["gomod"],
+      "addLabels": ["go"]
+    },
+    {
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["golang"],
+      "enabled": true
+    }
   ]
 }
