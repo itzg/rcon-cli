@@ -1,6 +1,6 @@
 module github.com/itzg/rcon-cli
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/james4k/rcon v0.0.0-20210222224819-34a67ca2b2d6
