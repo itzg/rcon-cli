@@ -19,7 +19,7 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"github.com/james4k/rcon"
+	"github.com/itzg/rcon-cli/rcon"
 	"github.com/peterh/liner"
 	"io"
 	"log"
@@ -85,23 +85,13 @@ func Start(hostPort string, password string, out io.Writer) {
 			return
 		}
 
-		reqId, err := remoteConsole.Write(cmd)
+		resp, err := remoteConsole.Execute(cmd)
 		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, "Failed to send command:", err.Error())
-			continue
-		}
-
-		resp, respReqId, err := remoteConsole.Read()
-		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				return
 			}
-			_, _ = fmt.Fprintln(os.Stderr, "Failed to read command:", err.Error())
+			_, _ = fmt.Fprintln(os.Stderr, "Failed to execute command:", err.Error())
 			continue
-		}
-
-		if reqId != respReqId {
-			_, _ = fmt.Fprintln(out, "Weird. This response is for another request.")
 		}
 
 		resp = colorize(resp)
@@ -119,19 +109,13 @@ func Execute(hostPort string, password string, out io.Writer, command ...string)
 	defer remoteConsole.Close()
 
 	preparedCmd := strings.Join(command, " ")
-	reqId, err := remoteConsole.Write(preparedCmd)
-
-	resp, respReqId, err := remoteConsole.Read()
+	resp, err := remoteConsole.Execute(preparedCmd)
 	if err != nil {
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return
 		}
-		_, _ = fmt.Fprintln(os.Stderr, "Failed to read command:", err.Error())
+		_, _ = fmt.Fprintln(os.Stderr, "Failed to execute command:", err.Error())
 		return
-	}
-
-	if reqId != respReqId {
-		_, _ = fmt.Fprintln(out, "Weird. This response is for another request.")
 	}
 
 	resp = colorize(resp)
