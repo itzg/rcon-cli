@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 
@@ -53,9 +54,10 @@ and the CLI will exit.
 
 		hostPort := net.JoinHostPort(viper.GetString("host"), strconv.Itoa(viper.GetInt("port")))
 		password := viper.GetString("password")
+		abortOnCtrlC := viper.GetBool("abort-on-ctrl-c")
 
 		if len(args) == 0 {
-			cli.Start(hostPort, password, os.Stdout)
+			cli.Start(hostPort, password, os.Stdout, abortOnCtrlC)
 		} else {
 			cli.Execute(hostPort, password, os.Stdout, args...)
 		}
@@ -78,6 +80,7 @@ func init() {
 	RootCmd.PersistentFlags().String("host", "localhost", "RCON server's hostname")
 	RootCmd.PersistentFlags().String("password", "", "RCON server's password")
 	RootCmd.PersistentFlags().Int("port", 25575, "Server's RCON port")
+	RootCmd.PersistentFlags().Bool("abort-on-ctrl-c", true, "Abort on ctrl-c rather than clearing line")
 	err := viper.BindPFlags(RootCmd.PersistentFlags())
 	if err != nil {
 		log.Fatal(err)
@@ -99,6 +102,7 @@ func initConfig() {
 
 	// This will allow for env vars like RCON_PORT
 	viper.SetEnvPrefix("rcon")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
