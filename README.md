@@ -34,10 +34,11 @@ RCON_PORT=25575 rcon-cli stop
 
 
 Flags:
-      --config string     config file (default is $HOME/.rcon-cli.yaml)
-      --host string       RCON server's hostname (default "localhost")
-      --password string   RCON server's password
-      --port int          Server's RCON port (default 27015)
+      --config string                 config file (default is $HOME/.rcon-cli.yaml)
+      --host string                   RCON server's hostname (default "localhost")
+      --password string               RCON server's password
+      --port int                      Server's RCON port (default 25575)
+      --abort-on-ctrl-c=true|false    If Ctrl-c should abort or just clear line, defaults to true (abort)
 ```
 
 ## Configuration
