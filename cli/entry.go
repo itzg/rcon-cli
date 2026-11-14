@@ -19,13 +19,14 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"github.com/james4k/rcon"
-	"github.com/peterh/liner"
 	"io"
 	"log"
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/james4k/rcon"
+	"github.com/peterh/liner"
 )
 
 const SectionSign = "§"
@@ -56,7 +57,7 @@ var colors = map[string]string{
 	"r": Reset,        // reset
 }
 
-func Start(hostPort string, password string, out io.Writer) {
+func Start(hostPort string, password string, out io.Writer, abortOnCtrlC bool) {
 	remoteConsole, err := rcon.Dial(hostPort, password)
 	if err != nil {
 		log.Fatal("Failed to connect to RCON server", err)
@@ -64,6 +65,7 @@ func Start(hostPort string, password string, out io.Writer) {
 	defer remoteConsole.Close()
 
 	lineEditor := liner.NewLiner()
+	lineEditor.SetCtrlCAborts(abortOnCtrlC)
 	defer lineEditor.Close()
 
 	for {
@@ -79,7 +81,10 @@ func Start(hostPort string, password string, out io.Writer) {
 			}
 
 			_, _ = fmt.Fprintln(os.Stderr, "Error reading input:", err)
+			continue
 		}
+
+		cmd = strings.Trim(cmd, " ")
 
 		if cmd == "exit" {
 			return
