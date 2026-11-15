@@ -86,6 +86,12 @@ func Start(hostPort string, password string, out io.Writer) {
 		}
 
 		resp, err := remoteConsole.Execute(cmd)
+		// An error can come with the part of the response that was received
+		// before it occurred, such as when stopping the server
+		if err == nil || resp != "" {
+			resp = colorize(resp)
+			_, _ = fmt.Fprintln(out, resp)
+		}
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				return
@@ -93,9 +99,6 @@ func Start(hostPort string, password string, out io.Writer) {
 			_, _ = fmt.Fprintln(os.Stderr, "Failed to execute command:", err.Error())
 			continue
 		}
-
-		resp = colorize(resp)
-		_, _ = fmt.Fprintln(out, resp)
 
 		lineEditor.AppendHistory(cmd)
 	}
@@ -110,16 +113,15 @@ func Execute(hostPort string, password string, out io.Writer, command ...string)
 
 	preparedCmd := strings.Join(command, " ")
 	resp, err := remoteConsole.Execute(preparedCmd)
-	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return
-		}
-		_, _ = fmt.Fprintln(os.Stderr, "Failed to execute command:", err.Error())
-		return
+	// An error can come with the part of the response that was received before
+	// it occurred, such as when stopping the server
+	if err == nil || resp != "" {
+		resp = colorize(resp)
+		_, _ = fmt.Fprintln(out, resp)
 	}
-
-	resp = colorize(resp)
-	_, _ = fmt.Fprintln(out, resp)
+	if err != nil && !errors.Is(err, io.EOF) {
+		_, _ = fmt.Fprintln(os.Stderr, "Failed to execute command:", err.Error())
+	}
 }
 
 func colorize(str string) string {

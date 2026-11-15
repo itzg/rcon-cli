@@ -47,8 +47,7 @@ func startFakeServer(t *testing.T, server *fakeServer) *fakeServer {
 	}
 	server.listener = listener
 
-	server.wg.Add(1)
-	go server.accept()
+	server.wg.Go(server.accept)
 
 	t.Cleanup(func() {
 		_ = listener.Close()
@@ -82,8 +81,6 @@ func (s *fakeServer) dial(t *testing.T) *Client {
 }
 
 func (s *fakeServer) accept() {
-	defer s.wg.Done()
-
 	for {
 		conn, err := s.listener.Accept()
 		if err != nil {
@@ -94,13 +91,13 @@ func (s *fakeServer) accept() {
 		s.conns = append(s.conns, conn)
 		s.mu.Unlock()
 
-		s.wg.Add(1)
-		go s.serve(conn)
+		s.wg.Go(func() {
+			s.serve(conn)
+		})
 	}
 }
 
 func (s *fakeServer) serve(conn net.Conn) {
-	defer s.wg.Done()
 	defer conn.Close()
 
 	authenticated := false
@@ -291,12 +288,18 @@ func TestExecute_terminatorNotAnswered(t *testing.T) {
 }
 
 // A server that stops will respond to the command, but might be gone before
-// answering the terminator.
+// answering the terminator. The response is then returned along with the error.
 func TestExecute_connectionClosedAfterResponse(t *testing.T) {
 	server := startFakeServer(t, &fakeServer{handler: respond, closeAfterResponse: true})
 	client := server.dial(t)
 
-	assertExecute(t, client, "stop", "ran stop")
+	response, err := client.Execute("stop")
+	if err == nil {
+		t.Fatal("expected an error with the connection closed")
+	}
+	if response != "ran stop" {
+		t.Fatalf("got %q, expected the response received before the connection got closed", response)
+	}
 
 	if _, err := client.Execute("list"); err == nil {
 		t.Fatal("expected an error with the connection closed")

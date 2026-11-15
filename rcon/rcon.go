@@ -107,9 +107,11 @@ func (c *Client) Close() error {
 // Not every server answers such a packet, so the wait for it is bounded. When
 // it runs out, whatever was received up to then is returned, and the remaining
 // commands on this connection settle for the first packet of the response
-// rather than paying for that wait again. Likewise, losing the connection
-// after the response has started, such as when stopping the server, is not
-// treated as an error.
+// rather than paying for that wait again.
+//
+// An error that occurs after the response has started, such as the connection
+// getting closed by a server that was told to stop, is returned along with
+// what was received of the response up to then.
 func (c *Client) Execute(command string) (string, error) {
 	id := c.nextID()
 	if err := c.write(id, typeCommand, command); err != nil {
@@ -140,7 +142,7 @@ func (c *Client) Execute(command string) (string, error) {
 	// to back tend to cause.
 	terminatorID := c.nextID()
 	if err := c.write(terminatorID, typeResponse, ""); err != nil {
-		return response.String(), nil
+		return response.String(), err
 	}
 
 	defer func() {
@@ -153,10 +155,13 @@ func (c *Client) Execute(command string) (string, error) {
 
 		p, err := c.read()
 		if err != nil {
+			// Running into the timeout is the expected outcome with a server
+			// that does not answer the terminator, rather than a failure
 			if errors.Is(err, os.ErrDeadlineExceeded) {
 				c.noTerminator = true
+				return response.String(), nil
 			}
-			return response.String(), nil
+			return response.String(), err
 		}
 
 		switch p.id {
@@ -214,8 +219,12 @@ func (c *Client) write(id int32, kind int32, body string) error {
 	return err
 }
 
-// read reads the next packet from the connection. Nothing is consumed until
-// the whole packet has arrived, so reading can resume after a timeout.
+// read reads the next packet from the connection.
+//
+// The packet is peeked at and only consumed once it has arrived as a whole,
+// rather than read piece by piece with io.ReadFull. Execute keeps using the
+// connection after a read has timed out, and a timeout in the middle of a
+// packet would otherwise leave the next read starting somewhere inside of it.
 func (c *Client) read() (packet, error) {
 	buf, err := c.reader.Peek(4)
 	if err != nil {
