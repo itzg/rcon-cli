@@ -2,7 +2,7 @@
 [![test](https://github.com/itzg/rcon-cli/actions/workflows/test.yml/badge.svg)](https://github.com/itzg/rcon-cli/actions/workflows/test.yml)
 
 
-A little RCON cli based on james4k's RCON library for golang.
+A little RCON cli for Minecraft and other game servers that speak the Source RCON protocol.
 
 ## Installation
 
