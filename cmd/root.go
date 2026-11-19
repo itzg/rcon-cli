@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/itzg/rcon-cli/cli"
 	"github.com/spf13/cobra"
@@ -73,7 +74,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.rcon-cli.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $XDG_CONFIG_HOME/rcon-cli/config.yaml or $HOME/.rcon-cli.yaml)")
 	RootCmd.PersistentFlags().String("host", "localhost", "RCON server's hostname")
 	RootCmd.PersistentFlags().String("password", "", "RCON server's password")
 	RootCmd.PersistentFlags().Int("port", 25575, "Server's RCON port")
@@ -87,6 +88,8 @@ func init() {
 func initConfig() {
 	if cfgFile != "" { // enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
+	} else if userConfigFile := findUserConfigFile(); userConfigFile != "" {
+		viper.SetConfigFile(userConfigFile)
 	} else {
 		viper.SetConfigName(".rcon-cli") // name of config file (without extension)
 		viper.AddConfigPath("$HOME")
@@ -101,4 +104,26 @@ func initConfig() {
 	// If a config file is found, read it in.
 	// Indicates viper.ConfigFileNotFoundError if no config file is provided, which is fine
 	_ = viper.ReadInConfig()
+}
+
+// findUserConfigFile looks for a config file in the user's config directory, such as
+// ~/.config/rcon-cli/config.yaml on Linux. It returns an empty string if there is none.
+func findUserConfigFile() string {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return ""
+	}
+	return findConfigFileIn(filepath.Join(dir, "rcon-cli"))
+}
+
+// findConfigFileIn returns the path of the first config.<ext> file in dir, where ext is
+// one of the extensions supported by viper, or an empty string if there is none.
+func findConfigFileIn(dir string) string {
+	for _, ext := range viper.SupportedExts {
+		candidate := filepath.Join(dir, "config."+ext)
+		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
+			return candidate
+		}
+	}
+	return ""
 }

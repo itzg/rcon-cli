@@ -34,7 +34,7 @@ RCON_PORT=25575 rcon-cli stop
 
 
 Flags:
-      --config string     config file (default is $HOME/.rcon-cli.yaml)
+      --config string     config file (default is $XDG_CONFIG_HOME/rcon-cli/config.yaml or $HOME/.rcon-cli.yaml)
       --host string       RCON server's hostname (default "localhost")
       --password string   RCON server's password
       --port int          Server's RCON port (default 27015)
@@ -42,7 +42,11 @@ Flags:
 
 ## Configuration
 
-You can preconfigure rcon-cli to use the arguments you want by default by modifying the file `.rcon-cli.yaml` in your home folder. If you want to use any other file use the argument `--config /path/to/the/config.yaml`. 
+You can preconfigure rcon-cli to use the arguments you want by default with a config file. rcon-cli uses the first one it finds of:
+
+1. the file given with `--config /path/to/the/config.yaml`
+2. `rcon-cli/config.yaml` in your user config directory: `$XDG_CONFIG_HOME` or `~/.config` on Linux, `~/Library/Application Support` on macOS, `%AppData%` on Windows
+3. `.rcon-cli.yaml` in your home folder, then in `/data` and `/server`
 
 Example of a `.rcon-cli.yaml` file:
 ```yaml
