@@ -80,7 +80,7 @@ func Start(hostPort string, password string, out io.Writer, abortOnCtrlC bool) {
 			continue
 		}
 
-		cmd = strings.Trim(cmd, " ")
+		cmd = strings.TrimSpace(cmd)
 
 		if cmd == "exit" {
 			return
