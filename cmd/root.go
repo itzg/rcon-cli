@@ -20,12 +20,12 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/itzg/rcon-cli/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"net"
-	"strconv"
 )
 
 var (

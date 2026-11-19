@@ -19,13 +19,14 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"github.com/itzg/rcon-cli/rcon"
-	"github.com/peterh/liner"
 	"io"
 	"log"
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/itzg/rcon-cli/rcon"
+	"github.com/peterh/liner"
 )
 
 const SectionSign = "§"
@@ -71,11 +72,7 @@ func Start(hostPort string, password string, out io.Writer, abortOnCtrlC bool) {
 		cmd, err := lineEditor.Prompt("> ")
 
 		if err != nil {
-			if errors.Is(err, liner.ErrPromptAborted) {
-				return
-			}
-
-			if errors.Is(err, io.EOF) {
+			if errors.Is(err, liner.ErrPromptAborted) || errors.Is(err, io.EOF) {
 				return
 			}
 
@@ -89,13 +86,8 @@ func Start(hostPort string, password string, out io.Writer, abortOnCtrlC bool) {
 			return
 		}
 
-		resp, err := remoteConsole.Execute(cmd)
-		// An error can come with the part of the response that was received
-		// before it occurred, such as when stopping the server
-		if err == nil || resp != "" {
-			resp = colorize(resp)
-			_, _ = fmt.Fprintln(out, resp)
-		}
+		err = executeCommandOnRemote(remoteConsole, out, cmd)
+
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				return
@@ -116,16 +108,22 @@ func Execute(hostPort string, password string, out io.Writer, command ...string)
 	defer remoteConsole.Close()
 
 	preparedCmd := strings.Join(command, " ")
-	resp, err := remoteConsole.Execute(preparedCmd)
-	// An error can come with the part of the response that was received before
-	// it occurred, such as when stopping the server
-	if err == nil || resp != "" {
-		resp = colorize(resp)
-		_, _ = fmt.Fprintln(out, resp)
-	}
+	err = executeCommandOnRemote(remoteConsole, out, preparedCmd)
+
 	if err != nil && !errors.Is(err, io.EOF) {
 		_, _ = fmt.Fprintln(os.Stderr, "Failed to execute command:", err.Error())
 	}
+}
+
+func executeCommandOnRemote(rconClient *rcon.Client, out io.Writer, cmd string) error {
+	resp, err := rconClient.Execute(cmd)
+	// An error can come with the part of the response that was received before
+	// it occurred, such as when stopping the server
+	if err == nil || resp != "" {
+		_, _ = fmt.Fprintln(out, colorize(resp))
+	}
+
+	return err
 }
 
 func colorize(str string) string {
