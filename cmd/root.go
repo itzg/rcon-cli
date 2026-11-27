@@ -15,22 +15,43 @@
 package cmd
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
+	"github.com/itzg/go-flagsfiller"
 	"github.com/itzg/rcon-cli/cli"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
+
+// Config holds every rcon-cli setting. Flags, environment variables and
+// the config file all feed into this one struct.
+type Config struct {
+	Host         string `default:"localhost" usage:"RCON server's hostname"`
+	Password     string `usage:"RCON server's password"`
+	Port         int    `default:"25575" usage:"Server's RCON port"`
+	AbortOnCtrlC bool   `default:"true" usage:"Abort on ctrl-c rather than clearing line"`
+}
 
 var (
 	cfgFile string
+	config  Config
 )
+
+// fileConfig mirrors Config but with pointer fields, so a config file
+// that omits a key can be told apart from one that sets it. A missing
+// key must not overwrite the flag, env or default value.
+type fileConfig struct {
+	Host         *string `yaml:"host"`
+	Password     *string `yaml:"password"`
+	Port         *int    `yaml:"port"`
+	AbortOnCtrlC *bool   `yaml:"abort-on-ctrl-c"`
+}
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -51,15 +72,12 @@ as a single command (joined by spaces), the response is displayed,
 and the CLI will exit.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		hostPort := net.JoinHostPort(viper.GetString("host"), strconv.Itoa(viper.GetInt("port")))
-		password := viper.GetString("password")
-		abortOnCtrlC := viper.GetBool("abort-on-ctrl-c")
+		hostPort := net.JoinHostPort(config.Host, strconv.Itoa(config.Port))
 
 		if len(args) == 0 {
-			cli.Start(hostPort, password, os.Stdout, abortOnCtrlC)
+			cli.Start(hostPort, config.Password, os.Stdout, config.AbortOnCtrlC)
 		} else {
-			cli.Execute(hostPort, password, os.Stdout, args...)
+			cli.Execute(hostPort, config.Password, os.Stdout, args...)
 		}
 	},
 }
@@ -77,37 +95,60 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $XDG_CONFIG_HOME/rcon-cli/config.yaml or $HOME/.rcon-cli.yaml)")
-	RootCmd.PersistentFlags().String("host", "localhost", "RCON server's hostname")
-	RootCmd.PersistentFlags().String("password", "", "RCON server's password")
-	RootCmd.PersistentFlags().Int("port", 25575, "Server's RCON port")
-	RootCmd.PersistentFlags().Bool("abort-on-ctrl-c", true, "Abort on ctrl-c rather than clearing line")
-	err := viper.BindPFlags(RootCmd.PersistentFlags())
-	if err != nil {
+
+	filler := flagsfiller.New(flagsfiller.WithEnv("RCON"))
+	var fs flag.FlagSet
+	if err := filler.Fill(&fs, &config); err != nil {
 		log.Fatal(err)
 	}
+	RootCmd.PersistentFlags().AddGoFlagSet(&fs)
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" { // enable ability to specify config file via flag
-		viper.SetConfigFile(cfgFile)
-	} else if userConfigFile := findUserConfigFile(); userConfigFile != "" {
-		viper.SetConfigFile(userConfigFile)
-	} else {
-		viper.SetConfigName(".rcon-cli") // name of config file (without extension)
-		viper.AddConfigPath("$HOME")
-		viper.AddConfigPath("/data")
-		viper.AddConfigPath("/server")
+	path := cfgFile
+	if path == "" {
+		path = findUserConfigFile()
 	}
+	if path == "" {
+		for _, dir := range []string{"$HOME", "/data", "/server"} {
+			if p := findConfigFileIn(dir); p != "" {
+				path = p
+				break
+			}
+		}
+	}
+	if path == "" {
+		return
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		log.Fatalf("reading config file %s: %v", path, err)
+	}
+	var fc fileConfig
+	if err := yaml.Unmarshal(data, &fc); err != nil {
+		log.Fatalf("parsing config file %s: %v", path, err)
+	}
+	applyConfigFile(&fc)
+}
 
-	// This will allow for env vars like RCON_PORT
-	viper.SetEnvPrefix("rcon")
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	// Indicates viper.ConfigFileNotFoundError if no config file is provided, which is fine
-	_ = viper.ReadInConfig()
+// applyConfigFile copies a config file value into config only where the
+// user did not set the value by flag or by env, so the precedence stays
+// flags > env > config file > defaults.
+func applyConfigFile(fc *fileConfig) {
+	flags := RootCmd.PersistentFlags()
+	if fc.Host != nil && !flags.Changed("host") && os.Getenv("RCON_HOST") == "" {
+		config.Host = *fc.Host
+	}
+	if fc.Password != nil && !flags.Changed("password") && os.Getenv("RCON_PASSWORD") == "" {
+		config.Password = *fc.Password
+	}
+	if fc.Port != nil && !flags.Changed("port") && os.Getenv("RCON_PORT") == "" {
+		config.Port = *fc.Port
+	}
+	if fc.AbortOnCtrlC != nil && !flags.Changed("abort-on-ctrl-c") && os.Getenv("RCON_ABORT_ON_CTRL_C") == "" {
+		config.AbortOnCtrlC = *fc.AbortOnCtrlC
+	}
 }
 
 // findUserConfigFile looks for a config file in the user's config directory, such as
@@ -120,10 +161,14 @@ func findUserConfigFile() string {
 	return findConfigFileIn(filepath.Join(dir, "rcon-cli"))
 }
 
-// findConfigFileIn returns the path of the first config.<ext> file in dir, where ext is
-// one of the extensions supported by viper, or an empty string if there is none.
+// configFileExtensions are the config file formats rcon-cli reads.
+// YAML is the only format the README documents.
+var configFileExtensions = []string{"yaml", "yml"}
+
+// findConfigFileIn returns the path of the first config.<ext> file in dir,
+// or an empty string if there is none.
 func findConfigFileIn(dir string) string {
-	for _, ext := range viper.SupportedExts {
+	for _, ext := range configFileExtensions {
 		candidate := filepath.Join(dir, "config."+ext)
 		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
 			return candidate
