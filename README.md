@@ -43,7 +43,7 @@ Flags:
 
 ## Configuration
 
-You can preconfigure rcon-cli to use the arguments you want by default with a config file. rcon-cli uses the first one it finds of:
+You can preconfigure rcon-cli to use the arguments you want by default with a config file. The config file is YAML (`.yaml` or `.yml`). rcon-cli uses the first one it finds of:
 
 1. the file given with `--config /path/to/the/config.yaml`
 2. `rcon-cli/config.yaml` in your user config directory: `$XDG_CONFIG_HOME` or `~/.config` on Linux, `~/Library/Application Support` on macOS, `%AppData%` on Windows
